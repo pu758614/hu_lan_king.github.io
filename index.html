@@ -479,7 +479,7 @@
             currentQuestion = questionIndex === 'random' ? questions[Math.floor(Math.random() * questions.length)] : questions[questionIndex];
             
             playerRoles = Array(playerCount).fill('唬爛王');
-            playerRoles[thinkerIndex] = '想想';
+            playerRoles[thinkerIndex] = '老實人';
 
             displayQuestion();
 			showDrawButton();  // 確保遊戲開始時抽按鈕是可見的
@@ -502,7 +502,7 @@
             playerId.textContent = `玩家 ${playerLetter}`;
 
             if (currentPlayer === thinkerIndex) {
-                roleContent.textContent = `你是「想想」：${currentQuestion.content}`;
+                roleContent.textContent = `你是「老實人」：${currentQuestion.content}`;
             } else {
                 roleContent.textContent = '你是「唬爛王」：請自己唬爛';
             }
