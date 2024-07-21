@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>唬爛王遊戲</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        input[type="number"], select {
+            width: 200px;
+            padding: 5px;
+            margin: 10px;
+        }
+
+        #role-content {
+            font-size: 18px;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+
+        #timer {
+            font-weight: bold;
+            color: #ff0000;
+        }
+
+        #question {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .hint {
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-setup">
+        <h1>唬爛王遊戲</h1>
+        <label for="player-count">選擇玩家數量：</label>
+        <input type="number" id="player-count" min="2" value="2"><br>
+        <label for="countdown-time">選擇倒數秒數：</label>
+        <input type="number" id="countdown-time" min="5" value="10"><br>
+        <label for="question-select">選擇題目：</label>
+        <select id="question-select"></select><br>
+        <button id="start-game">開始遊戲</button>
+    </div>
+
+    <div id="game-area" style="display:none;">
+        <h2 id="question"></h2>
+        <p id="hint-1" class="hint"></p>
+        <p id="hint-2" class="hint"></p>
+        <button id="draw-button">抽</button>
+        <div id="role-content"></div>
+        <div id="timer"></div>
+        <div id="player-id"></div>
+    </div>
+
+    <div id="game-end" style="display:none;">
+        <h2>遊戲結束</h2>
+        <div id="final-question"></div>
+        <div id="final-hints"></div>
+        <label for="check-role">確認角色：</label>
+        <select id="check-role"></select>
+        <button id="confirm-role">確認</button>
+        <div id="role-result"></div>
+        <button id="restart-game">重新開始</button>
+    </div>
+
+    <script>
+        const questions = [
+    {
+        "question": "7±2",
+        "hint_1": "None",
+        "hint_2": "提示僅有一個正確",
+        "content": "一個關於短期記憶的研究，指出年輕人通常能短期內記住大約7個單位項目。例如7個數字，6個字母，5個單詞"
+    },
+    {
+        "question": "BJ聯盟",
+        "hint_1": "日本",
+        "hint_2": "時空；戰爭",
+        "content": "日本的職業籃球賽聯盟，在2016年中止，BJ的意思是Basketball Japen的縮寫"
+    },
+    {
+        "question": "Doctor Who",
+        "hint_1": "影視",
+        "hint_2": "家電；大學",
+        "content": "是一款由BBC在1963年開始制作的科幻電視劇，中文譯名為神秘博士，講述一個博士作為時間管理者的冒險經歷"
+    },
+    {
+        "question": "4分33秒",
+        "hint_1": "音樂",
+        "hint_2": "海豚",
+        "content": "一首著名的演奏樂曲，但沒有任何樂器的聲音，表演者只會做出 擦汗，開合琴蓋等動作，有稱為“四分半的寂靜”"
+    },
+    {
+        "question": "WHY",
+        "hint_1": "None",
+        "hint_2": "提示僅有一個正確",
+        "content": "一個美國小鎮，本身因為位於Y字路口之間所以叫Y，但法律規定 最少有3個字母，所以改名叫WHY"
+    },
+    {
+        "question": "笨蛋三明治",
+        "hint_1": "餐飲",
+        "hint_2": "提示僅有一個正確",
+        "content": "美國真人秀《地獄廚房》知名訓話片段，廚藝學院頭部唄主廚“戈登拉姆齊”拿吐司並重覆“我是一個笨蛋三明治”"
+    },
+    {
+        "question": "Ten-Four",
+        "hint_1": "航空",
+        "hint_2": "運動",
+        "content": "Ten-Four是二十世紀初的通訊用語，表示收到消息，知道，立即 執行等意思，目前常用於美國警方通訊術語"
+    },
+    {
+        "question": "庇護五世",
+        "hint_1": "甜點",
+        "hint_2": "提示僅有一個正確",
+        "content": "一種源於尼瓜拉瓜的蛋糕。將蛋糕勁頭酒，再鋪上一層卡仕達醬 ，並撒上肉桂粉。名稱源於一個教宗"
+    },
+    {
+        "question": "螳螂吸允",
+        "hint_1": "地名",
+        "hint_2": "植物;寓言",
+        "content": "“蟾蜍吸吮”這個名字可追溯到19世紀。阿肯色河上的汽船船員常 到這個小鎮酗酒，喝得肚子像蟾蜍那樣鼓起來，小鎮因此得名。"
+    },
+    {
+        "question": "超級無敵我愛你",
+        "hint_1": "動漫",
+        "hint_2": "提示僅有一個正確",
+        "content": "出自香港動漫《末x戰狼》里的一招武功絕學，為“強x沖擊”的第 十二級境界。"
+    },
+    {
+        "question": "地球三明治",
+        "hint_1": "None",
+        "hint_2": "提示僅有一個正確",
+        "content": "一個幽默的網絡挑戰，兩人站在地球的兩個對立點，各自把一塊 面包放在地上，便可以把地球夾在兩塊面包中間"
+    },
+    {
+        "question": "第34條法則",
+        "hint_1": "網絡",
+        "hint_2": "提示僅有一個正確",
+        "content": "法則原文是：不管他是什麽事物，只要它存在，則他一定可以跟 色情扯上關系，沒有例外。意思是在互聯網時代，一切你能想象的事物，都可以圖像文 章或多媒體來使之色情化"
+    },
+    {
+        "question": "第二本書",
+        "hint_1": "None",
+        "hint_2": "（提示僅有一個正確）",
+        "content": "希特勒的第二本書，第一本為《我的奮鬥》，內容記述了他的極 端主義思想，但未在其有生之年出版"
+    },
+    {
+        "question": "防守聖經獎",
+        "hint_1": "提示：美國獎項",
+        "hint_2": "（提示僅有一個正確）",
+        "content": "是美國職業棒球聯賽從2006年開始的一個年度辦法的獎項，在不 防守位置，各選出一位防守表現最為傑出的球員並頒發獎項"
+    },
+    {
+        "question": "瘋狂山脈",
+        "hint_1": "文學",
+        "hint_2": "氣象；化學",
+        "content": "是美國克蘇魯文化之父洛夫克拉夫特於1963年發表的科幻恐怖小 說，講述一個考察隊在南極山脈上的發現之旅"
+    },
+    {
+        "question": "鬼蓬頭",
+        "hint_1": "電影",
+        "hint_2": "遊樂設施",
+        "content": "燒賣的別稱，古代燒賣外型像豎起的頭發，因而的命，此名稱出 自清代的《揚州畫舫錄》"
+    },
+    {
+        "question": "合成謬論",
+        "hint_1": "經濟學",
+        "hint_2": "化學",
+        "content": "合成謬誤是薩繆爾森提出來的。意即，它是一種謬誤，對局部說 來是對的東西，僅僅由於它對局部而言是對的，便說它對總體而言也必然是對的。在經 濟學領域中，十分肯定的是：微觀上而言是對的東西，在宏觀上並不總是對的；反之， 在宏觀上是對的東西，在微觀上可能是十分錯誤的。如，一戶人家教育小孩刻苦學習， 考上大學，成了人上人，但家家都這麽做，卻無法如願。合成謬誤是缺乏創造性和缺乏 開拓性的表現，它會造成重覆生產、資源浪費、供求單一。但合成謬誤也是市場自我調 節的一種表現，平衡著供求和價格的關系。"
+    },
+    {
+        "question": "黑白熊事件",
+        "hint_1": "動物園",
+        "hint_2": "動漫",
+        "content": "1987年的元旦，台灣一家動物園展出了一只疑似大熊貓的黑白熊 ，當時被誤以為台灣出現的野生熊貓，後來才發現這是一個人工塗色的商業噱頭"      
+    },
+    {
+        "question": "紅皇後假說",
+        "hint_1": "愛麗絲夢遊仙境",
+        "hint_2": "提示僅有一個正確",
+        "content": "生物學理論，指生物必須不停演化才能生存。引申自《愛麗絲夢 遊仙境》中紅心皇後的對白：“你必須不停的跑，才能保持在原地”"
+    },
+    {
+        "question": "狐貍叫",
+        "hint_1": "地名",
+        "hint_2": "提示僅有一個正確",
+        "content": "狐貍叫背靠東龍二軬，面臨赤徑口；倚傍山腰處，隱藏灌叢間。 狐貍叫雖不屬美景勝地，但其以野生動物行為而命名的地方名稱，在香港也屬少見。從 狐貍叫一名，可推測此地可能曾有狐貍出沒[1]。有關新界的狐貍，亦確曾文字記載：在一份1912年關於新界的報告中，曾紀錄新界山區有狐貍出沒，而且數量甚多[2]；1920-30年，洋人也曾在粉嶺狩獵紅狐[3]；此外，在1960年代，新界仍有數對紅狐[4]出沒，惟具體地點不詳。"
+    },
+    {
+        "question": "灰姑娘效應",
+        "hint_1": "心理學",
+        "hint_2": "物理；天氣",
+        "content": "一個心理學現象，指繼子或者繼女受其繼父母虐打，虐待的比例 ，明顯高於親生父母"
+    },
+    {
+        "question": "緘默法則",
+        "hint_1": "犯罪",
+        "hint_2": "提示僅有一個正確",
+        "content": "黑手黨之間的守則。第一條是黑手黨成員不得同胞警方，並需要 向政府組織保持緘默。第二條是尋仇不可以禍及家人。"
+    },
+    {
+        "question": "金屑",
+        "hint_1": "災難",
+        "hint_2": "謊報; 樂器",
+        "content": "“金唇”竊聽器代表了世界頂級水平，它不需要電池，也不需要外 來電流，從而使當時的反竊聽設備不可能捕捉到任何信號。“金唇”可以接收到300米以內大耗電量振蕩器所發出的微波脈沖，其工作壽命可以無限延長。從外表上看，這種竊聽 器就像一個帶尾巴的蝌蚪。"
+    },
+    {
+        "question": "金熊獎",
+        "hint_1": "獎項",
+        "hint_2": "提示僅有一個正確",
+        "content": "柏林影展每年頒布的最大獎，被認為是電影界最高榮譽之一，自1951年開始辦法，獎項的象征采用熊是因為這是柏林的代表動物"
+    },
+    {
+        "question": "軍刀綜合癥",
+        "hint_1": "病痛",
+        "hint_2": "提示僅有一個正確",
+        "content": "肺血管發育異常肺血管沿右心緣有軍刀樣陰影，右肺發育不全， 有些肺癌患者可出現一些少見的癥狀與體征，這些癥狀與 體征表現於胸部以外的臟器，不是腫瘤的直接作用或引起，可出現肺癌發現前後"
+    },
+    {
+        "question": "靠櫃破冰",
+        "hint_1": "養殖",
+        "hint_2": "網絡",
+        "content": "出自網絡用語，在百貨公司遇到冷淡，態度不好的店員。靠櫃的 意思是“靠近櫃台觀看商品”"
+    },
+    {
+        "question": "拉撒路現象",
+        "hint_1": "生理現象",
+        "hint_2": "提示僅有一個正確",
+        "content": "腦死的患者在死亡後，當脊椎唄觸碰，會有幾率高舉雙手，再交 叉在胸前，令人以為覆活了，但其實只是神經本能反應"
+    },
+    {
+        "question": "禮肥",
+        "hint_1": "百貨公司",
+        "hint_2": "股票",
+        "content": "果樹或者作物在收成後會養分用盡，為了感謝果樹而給予營養補 給的肥料。可幫助回覆樹體營養並儲存養分促進果實品質以及增強品質"
+    },
+    {
+        "question": "流氓熊貓",
+        "hint_1": "遊戲",
+        "hint_2": "電影",
+        "content": "遊戲寶可夢系列的其中一只寶可夢。屬性是格鬥和惡，性情暴躁 ，依賴暴力解決問題"
+    },
+    {
+        "question": "冒煙測試",
+        "hint_1": "天災",
+        "hint_2": "程序，情侶",
+        "content": "是一種程序和軟件的測試方式，指的是先將主要功能初步進行快 速測試，用來了解這個軟件的主要功能是否能夠正常運行"
+    },
+    {
+        "question": "美麗的分泌物",
+        "hint_1": "香水",
+        "hint_2": "提示僅有一個正確",
+        "content": "一款小眾品牌的香水，充斥著血液、汗水與精液等氣味，更帶上 金屬的腥味。聞太久會引起頭暈和嘔吐"
+    },
+    {
+        "question": "摸頭金",
+        "hint_1": "遊戲",
+        "hint_2": "電影",
+        "content": "遊戲《狼人殺》的術語，意思是狼人假裝預言家，並宣告誰是好 人，以獲取其他玩家的信任。"
+    },
+    {
+        "question": "莫紮特技術",
+        "hint_1": "海洋",
+        "hint_2": "電影；飲食",
+        "content": "一個常溫幹燥技術的綽號，溫度在25度到35度之間，將物品內的 水分除去的一種技術，一般用於食物保存，其命名為常溫幹燥技術的英文首字母組合而 成"
+    },
+    {
+        "question": "青藍冰水",
+        "hint_1": "文學",
+        "hint_2": "地理; 飲食",
+        "content": "文學青出於，冰寒於水的縮寫，用來比喻學生超過老師或者後人 超過前人"
+    },
+    {
+        "question": "曲折金字塔",
+        "hint_1": "心理學",
+        "hint_2": "埃及；經濟",
+        "content": "曲折金字塔（Bent Pyramid）是位於埃及代赫舒爾（Dahshur）的一座金字塔，為埃及第四王朝法老斯尼夫魯時期所建造，是一座曲折金字塔。曲折金字 塔是一個早期金字塔發展出的奇特範例，也是斯尼夫魯的第二座金字塔。考古學家相信 曲折金字塔代表了一個金字塔由階梯金字塔轉變為表面光滑金字塔的過渡時期。"      
+    },
+    {
+        "question": "日日日",
+        "hint_1": "文學",
+        "hint_2": "占卜，密碼",
+        "content": "一位日本的男性小說家，名字來源於晶字拆分，著作有《狂亂家 族日記》"
+    },
+    {
+        "question": "如果我有一座新冰箱",
+        "hint_1": "心理學",
+        "hint_2": "銷售; 教育",
+        "content": "台灣高考語文作文考試的考題，意外成為網絡熱門話題，成為教 育機構的作文示範命題，讓學生練習面對可能出現的特殊作文題目"
+    },
+    {
+        "question": "燒嶼島",
+        "hint_1": "島嶼",
+        "hint_2": "提示僅有一個正確",
+        "content": "一個位於日本北海道西方的島嶼，人口約三百人，名稱的意思是 附近的島，源於日本少數名族的語言"
+    },
+    {
+        "question": "舌尖效應",
+        "hint_1": "心理學",
+        "hint_2": "（提示僅有一個正確）",
+        "content": "話到嘴邊卻突然卻想不起來的現象，是因為大腦對記憶內容的展 示性抑制做造成的"
+    },
+    {
+        "question": "生命之星",
+        "hint_1": "標志",
+        "hint_2": "提示僅有一個正確",
+        "content": "表示急救單位或該人員的標志，在各國的急救單位都會使用。呈 藍色，六邊突出的星形，並在中間加上阿斯克勒庇厄斯之仗"
+    },
+    {
+        "question": "史高維爾指標",
+        "hint_1": "登山",
+        "hint_2": "食品，財經",
+        "content": "是1912年由美國化學家所制定的測量辣椒素含量的一項指標，他 的實驗方法是將被測物一單位的辣椒素逐步溶解到糖水里，然後交給不同人品嘗，直到 無法嘗出辣味為止"
+    },
+    {
+        "question": "史特金定律",
+        "hint_1": "None",
+        "hint_2": "提示僅有一個正確",
+        "content": "史特金定律（Sturgeons Law），是科幻作家史特金提出的，定律的內容是：任何事物，其中90%都是垃圾。引申到的社區網站的內容上的意思是：社區所有的作品中，90%以上的作品都是“垃圾”。因此要有能力去蕪取菁。一般而言，社區中只有1%人在貢獻，10%的人參與評價，而90%是大多數的沈默者。"
+    },
+    {
+        "question": "譚納標準",
+        "hint_1": "人體",
+        "hint_2": "提示僅有一個正確",
+        "content": "由英國醫生發明，是測量身體性征發育程度的標準。例如根據乳 房大小、睪丸體積去判斷"
+    },
+    {
+        "question": "天乳",
+        "hint_1": "天文學",
+        "hint_2": "虛構小說；運動",
+        "content": "天乳是中國古代星官之一，星官是中國古代對於恒星分組的方式 ，天乳位於現代星座劃分的巨蛇座，含有一顆恒星"
+    },
+    {
+        "question": "天使稅",
+        "hint_1": "飲食",
+        "hint_2": "提示僅有一個正確",
+        "content": "蘇格蘭人會用橡木桶儲存威士忌，但桶內的威士忌每年都有2-4% 揮發到空氣中，這個現象被稱為天使稅，意指酒被天使偷偷喝掉"
+    },
+    {
+        "question": "土拔鼠之日",
+        "hint_1": "None",
+        "hint_2": "提示僅有一個正確",
+        "content": "土撥鼠日，又可稱為土撥鼠節（Groundhog Day）是北美地區的傳統節日。每年公歷2月2日為土撥鼠日，美國和加拿大許多城市和村莊都會慶祝。自從1887年以來，一代又一代的土撥鼠一直擔負著預報時令的任務。根據傳說，如果土撥鼠能看到它自己的影子，那麽北美的冬天還有6個星期才會結束。如果它看不到影子，春天不久就會來臨。"
+    },
+    {
+        "question": "烏咖喱",
+        "hint_1": "飲食",
+        "hint_2": "提示僅有一個正確",
+        "content": "東非的瀨粉類主食，外型長的很像饅頭，他是水煮熟的玉米面包 ，但口感跟饅頭差不多"
+    },
+    {
+        "question": "無聊十億年",
+        "hint_1": "刑法",
+        "hint_2": "生物；小說",
+        "content": "地球18億年前到8億年前的一段時期，在這十億年中，地球生物和環境的變化都異常穩定，因而得名"
+    },
+    {
+        "question": "小豆洗",
+        "hint_1": "日本",
+        "hint_2": "提示僅有一個正確",
+        "content": "日本傳說的妖怪，常在河邊出現，會發出洗豆“洗漱洗漱”的聲音 ，吸引人們掉落河中"
+    },
+    {
+        "question": "小黃鴨法則",
+        "hint_1": "心理學；程序；動物",
+        "hint_2": "提示僅有一個正確",
+        "content": "此概念是參照於一個來自《程序員修煉之道》書中的一個故事。 傳說中程序大師隨身攜帶一只小黃鴨，在調試代碼的時候會在桌上放上這只小黃鴨，然 後詳細地向鴨子解釋每行代碼"
+    },
+    {
+        "question": "薪能",
+        "hint_1": "鹿俁",
+        "hint_2": "藝術",
+        "content": "日本表演藝術的一種，主要在夏日的夜晚進行，人們會在舞台附 近點燃火堆，並進行樂曲的表演。"
+    },
+    {
+        "question": "血刃科技",
+        "hint_1": "風險",
+        "hint_2": "提示僅有一個正確",
+        "content": "指具有高風險又不一定可靠的技術，科技需要投放大量資源開發 ，伴隨的成果可以很大，但風險同樣大，電子郵件也曾被視為一個血刃科技"
+    },
+    {
+        "question": "壓八碼",
+        "hint_1": "工作",
+        "hint_2": "提示僅有一個正確",
+        "content": "一種畫押的概念，把你的承辦職章蓋上還有寫上日期和時間，有 問題要負責"
+    },
+    {
+        "question": "一滴血原則",
+        "hint_1": "20世紀美國",
+        "hint_2": "提示僅有一個正確",
+        "content": "一個曾盛行於20世紀美國的法律原則：只要一個人有一個祖先是 黑人，就可以認定他也是黑人"
+    },
+    {
+        "question": "伊戈達拉獎",
+        "hint_1": "獎項",
+        "hint_2": "（提示僅有一個正確）",
+        "content": "某站名嘴徐靜雨屢屢戲稱NBAFMVP為伊戈達拉獎，並聲稱此獎價值極低，就是為頒給伊戈達拉這樣的選手設立的。"
+    },
+    {
+        "question": "郁金香效應",
+        "hint_1": "經濟學",
+        "hint_2": "植物；心理學",
+        "content": "637年發生在荷蘭，是世界上最早的泡沫經濟事件。當時由奧斯曼土耳其引進的郁金香球根異常地吸引人，引起大眾搶購，導致價格瘋狂飆高，在泡沫化 過後，價格僅剩下泡沫時的百分之一，讓荷蘭各大都市陷入混亂。"
+    },
+    {
+        "question": "炸西瓜",
+        "hint_1": "水果",
+        "hint_2": "戰爭",
+        "content": "一種表皮非常堅硬的水果，成熟時的果實收到壓力會爆炸，威力 足以把小鳥炸死，因此又名炸彈樹"
+    },
+    {
+        "question": "紫之隧道",
+        "hint_1": "地名",
+        "hint_2": "遊戲",
+        "content": "紫之隧道（Zizhi Tunnel），是中國浙江省杭州市西湖區境內的 城市地下通道，位於西湖風景區之下，也是杭州市\"四縱五橫\"快速路網重要組成部分"
+    },
+
+]
+
+        let playerCount;
+        let currentPlayer = 0;
+        let currentQuestion;
+        let thinkerIndex;
+        let countdownTime;
+        let playerRoles = [];
+
+        function initializeGame() {
+            const questionSelect = document.getElementById('question-select');
+            questionSelect.innerHTML = '<option value="random">隨機題目</option>';
+            questions.forEach((q, index) => {
+                questionSelect.innerHTML += `<option value="${index}">${q.question}</option>`;
+            });
+        }
+
+        function startGame() {
+            playerCount = parseInt(document.getElementById('player-count').value);
+            countdownTime = parseInt(document.getElementById('countdown-time').value);
+            if (playerCount < 2) {
+                alert('玩家數量必須至少為2');
+                return;
+            }
+            
+            document.getElementById('game-setup').style.display = 'none';
+            document.getElementById('game-area').style.display = 'block';
+            
+            thinkerIndex = Math.floor(Math.random() * playerCount);
+            const questionIndex = document.getElementById('question-select').value;
+            currentQuestion = questionIndex === 'random' ? questions[Math.floor(Math.random() * questions.length)] : questions[questionIndex];
+            
+            playerRoles = Array(playerCount).fill('唬爛王');
+            playerRoles[thinkerIndex] = '想想';
+
+            displayQuestion();
+			showDrawButton();  // 確保遊戲開始時抽按鈕是可見的
+        }
+
+        function displayQuestion() {
+            document.getElementById('question').textContent = `題目：${currentQuestion.question}`;
+            document.getElementById('hint-1').textContent = `提示1: ${currentQuestion.hint_1}`;
+            document.getElementById('hint-2').textContent = `提示2: ${currentQuestion.hint_2}`;
+        }
+		function showDrawButton() {
+			const drawButton = document.getElementById('draw-button');
+			drawButton.style.display = 'inline-block';  // 顯示抽按鈕
+		}
+        function drawRole() {
+			const drawButton = document.getElementById('draw-button');
+            const roleContent = document.getElementById('role-content');
+            const playerId = document.getElementById('player-id');
+            const playerLetter = String.fromCharCode(65 + currentPlayer);
+            playerId.textContent = `玩家 ${playerLetter}`;
+
+            if (currentPlayer === thinkerIndex) {
+                roleContent.textContent = `你是「想想」：${currentQuestion.content}`;
+            } else {
+                roleContent.textContent = '你是「唬爛王」：請自己唬爛';
+            }
+            
+            let timeLeft = countdownTime;
+            const timer = document.getElementById('timer');
+            timer.textContent = `${timeLeft}秒後隱藏`;
+            
+            const countDown = setInterval(() => {
+                timeLeft--;
+                timer.textContent = `${timeLeft}秒後隱藏`;
+                if (timeLeft <= 0) {
+                    clearInterval(countDown);
+                    roleContent.textContent = '';
+                    timer.textContent = '';
+                    playerId.textContent = '';
+                    currentPlayer++;
+                    if (currentPlayer >= playerCount) {
+                        endGame();
+                    } else {
+						showDrawButton();  // 顯示抽按鈕，準備給下一個玩家使用
+					}
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            document.getElementById('game-area').style.display = 'none';
+            document.getElementById('game-end').style.display = 'block';
+            
+            document.getElementById('final-question').textContent = `題目：${currentQuestion.question}`;
+            document.getElementById('final-hints').innerHTML = `
+                提示1: ${currentQuestion.hint_1}<br>
+                提示2: ${currentQuestion.hint_2}
+            `;
+
+            const checkRoleSelect = document.getElementById('check-role');
+            checkRoleSelect.innerHTML = '';
+            for (let i = 0; i < playerCount; i++) {
+                const playerLetter = String.fromCharCode(65 + i);
+                checkRoleSelect.innerHTML += `<option value="${playerLetter}">玩家 ${playerLetter}</option>`;
+            }
+        }
+
+        function confirmRole() {
+            const playerLetter = document.getElementById('check-role').value;
+            const playerIndex = playerLetter.charCodeAt(0) - 65;
+            const roleResult = document.getElementById('role-result');
+            roleResult.textContent = `玩家 ${playerLetter} 的角色是：${playerRoles[playerIndex]}`;
+        }
+
+        function restartGame() {
+            document.getElementById('game-end').style.display = 'none';
+            document.getElementById('game-setup').style.display = 'block';
+            currentPlayer = 0;
+            document.getElementById('role-result').textContent = '';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeGame();
+            document.getElementById('start-game').addEventListener('click', startGame);
+            document.getElementById('draw-button').addEventListener('click', drawRole);
+            document.getElementById('confirm-role').addEventListener('click', confirmRole);
+            document.getElementById('restart-game').addEventListener('click', restartGame);
+        });
+    </script>
+</body>
+</html>
