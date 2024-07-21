@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>唬爛王遊戲</title>
+    <title>唬爛王</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -63,7 +63,6 @@
 </head>
 <body>
     <div id="game-setup">
-        <h1>唬爛王遊戲</h1>
         <label for="player-count">選擇玩家數量：</label>
         <input type="number" id="player-count" min="2" value="2"><br>
         <label for="countdown-time">選擇倒數秒數：</label>
@@ -83,6 +82,7 @@
         <div id="player-id"></div>
     </div>
 
+
     <div id="game-end" style="display:none;">
         <h2>遊戲結束</h2>
         <div id="final-question"></div>
@@ -93,6 +93,7 @@
         <div id="role-result"></div>
         <button id="restart-game">重新開始</button>
     </div>
+
 
     <script>
         const questions = [
