@@ -83,15 +83,17 @@
     </div>
 
 
-    <div id="game-end" style="display:none;">
-        <h2>遊戲結束</h2>
-        <div id="final-question"></div>
-        <div id="final-hints"></div>
-        <label for="check-role">確認角色：</label>
-        <select id="check-role"></select>
-        <button id="confirm-role">確認</button>
-        <div id="role-result"></div>
-        <button id="restart-game">重新開始</button>
+    <div id="question-speak" style="display:none;">
+        <h2>輪流講解題目</h2>
+		<div id="final-question"></div>
+		<div id="final-hints"></div>
+		<label for="check-role">確認角色：</label>
+		<select id="check-role"></select>
+		<button id="confirm-role">確認</button>
+		<div id="role-result"></div>
+		<button id="reveal-result">公布結果</button><br><br><br>
+		<div id="result-content" style="display:none;"></div>
+		<button id="restart-game">重新開始</button>
     </div>
 
 
@@ -203,7 +205,7 @@
         "question": "黑白熊事件",
         "hint_1": "動物園",
         "hint_2": "動漫",
-        "content": "1987年的元旦，台灣一家動物園展出了一只疑似大熊貓的黑白熊 ，當時被誤以為台灣出現的野生熊貓，後來才發現這是一個人工塗色的商業噱頭"      
+        "content": "1987年的元旦，台灣一家動物園展出了一只疑似大熊貓的黑白熊 ，當時被誤以為台灣出現的野生熊貓，後來才發現這是一個人工塗色的商業噱頭"
     },
     {
         "question": "紅皇後假說",
@@ -305,7 +307,7 @@
         "question": "曲折金字塔",
         "hint_1": "心理學",
         "hint_2": "埃及；經濟",
-        "content": "曲折金字塔（Bent Pyramid）是位於埃及代赫舒爾（Dahshur）的一座金字塔，為埃及第四王朝法老斯尼夫魯時期所建造，是一座曲折金字塔。曲折金字 塔是一個早期金字塔發展出的奇特範例，也是斯尼夫魯的第二座金字塔。考古學家相信 曲折金字塔代表了一個金字塔由階梯金字塔轉變為表面光滑金字塔的過渡時期。"      
+        "content": "曲折金字塔（Bent Pyramid）是位於埃及代赫舒爾（Dahshur）的一座金字塔，為埃及第四王朝法老斯尼夫魯時期所建造，是一座曲折金字塔。曲折金字 塔是一個早期金字塔發展出的奇特範例，也是斯尼夫魯的第二座金字塔。考古學家相信 曲折金字塔代表了一個金字塔由階梯金字塔轉變為表面光滑金字塔的過渡時期。"
     },
     {
         "question": "日日日",
@@ -470,14 +472,14 @@
                 alert('玩家數量必須至少為2');
                 return;
             }
-            
+
             document.getElementById('game-setup').style.display = 'none';
             document.getElementById('game-area').style.display = 'block';
-            
+
             thinkerIndex = Math.floor(Math.random() * playerCount);
             const questionIndex = document.getElementById('question-select').value;
             currentQuestion = questionIndex === 'random' ? questions[Math.floor(Math.random() * questions.length)] : questions[questionIndex];
-            
+
             playerRoles = Array(playerCount).fill('唬爛王');
             playerRoles[thinkerIndex] = '老實人';
 
@@ -487,12 +489,22 @@
 
         function displayQuestion() {
             document.getElementById('question').textContent = `題目：${currentQuestion.question}`;
-            document.getElementById('hint-1').textContent = `提示1: ${currentQuestion.hint_1}`;
-            document.getElementById('hint-2').textContent = `提示2: ${currentQuestion.hint_2}`;
         }
 		function showDrawButton() {
 			const drawButton = document.getElementById('draw-button');
 			drawButton.style.display = 'inline-block';  // 顯示抽按鈕
+		}
+		function revealResult() {
+			if (confirm("確定要公布結果嗎？")) {
+				const resultContent = document.getElementById('result-content');
+				const thinkerLetter = String.fromCharCode(65 + thinkerIndex);
+				resultContent.innerHTML = `
+					<h3>結果公布</h3>
+					<p>老實人是：玩家 ${thinkerLetter}</p>
+					<p>題目內容：${currentQuestion.content}</p>
+				`;
+				resultContent.style.display = 'block';
+			}
 		}
         function drawRole() {
 			const drawButton = document.getElementById('draw-button');
@@ -506,11 +518,11 @@
             } else {
                 roleContent.textContent = '你是「唬爛王」：請自己唬爛';
             }
-            
+
             let timeLeft = countdownTime;
             const timer = document.getElementById('timer');
             timer.textContent = `${timeLeft}秒後隱藏`;
-            
+
             const countDown = setInterval(() => {
                 timeLeft--;
                 timer.textContent = `${timeLeft}秒後隱藏`;
@@ -531,13 +543,9 @@
 
         function endGame() {
             document.getElementById('game-area').style.display = 'none';
-            document.getElementById('game-end').style.display = 'block';
-            
+            document.getElementById('question-speak').style.display = 'block';
+
             document.getElementById('final-question').textContent = `題目：${currentQuestion.question}`;
-            document.getElementById('final-hints').innerHTML = `
-                提示1: ${currentQuestion.hint_1}<br>
-                提示2: ${currentQuestion.hint_2}
-            `;
 
             const checkRoleSelect = document.getElementById('check-role');
             checkRoleSelect.innerHTML = '';
@@ -555,7 +563,7 @@
         }
 
         function restartGame() {
-            document.getElementById('game-end').style.display = 'none';
+            document.getElementById('question-speak').style.display = 'none';
             document.getElementById('game-setup').style.display = 'block';
             currentPlayer = 0;
             document.getElementById('role-result').textContent = '';
@@ -567,6 +575,7 @@
             document.getElementById('draw-button').addEventListener('click', drawRole);
             document.getElementById('confirm-role').addEventListener('click', confirmRole);
             document.getElementById('restart-game').addEventListener('click', restartGame);
+			document.getElementById('reveal-result').addEventListener('click', revealResult);
         });
     </script>
 </body>
