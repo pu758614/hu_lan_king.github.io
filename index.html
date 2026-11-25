@@ -1,104 +1,262 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>唬爛王</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            text-align: center;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1b1033">
+<title>唬爛王</title>
+<style>
+:root {
+    --bg1: #f6f1ff;
+    --bg2: #ffe9f1;
+    --card: #ffffff;
+    --ink: #231a3a;
+    --muted: #6f6785;
+    --line: #e6e0f2;
+    --brand: #7c4dff;
+    --brand-ink: #ffffff;
+    --honest: #12a37f;
+    --bluff: #e8466b;
+    --chip: #f0eafc;
+    --shadow: 0 10px 30px rgba(60, 30, 120, .12);
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg1: #1b1033;
+        --bg2: #2b1030;
+        --card: #281a45;
+        --ink: #f4efff;
+        --muted: #a99fc4;
+        --line: #3d2d63;
+        --brand: #9b7bff;
+        --brand-ink: #1b1033;
+        --honest: #3ddbb0;
+        --bluff: #ff7a99;
+        --chip: #36265c;
+        --shadow: 0 10px 30px rgba(0, 0, 0, .4);
+    }
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; min-height: 100%; }
+body {
+    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    background: linear-gradient(160deg, var(--bg1), var(--bg2)) fixed;
+    line-height: 1.6;
+    padding: max(20px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+}
+.app { max-width: 480px; margin: 0 auto; }
+header { text-align: center; margin: 8px 0 20px; }
+header h1 { margin: 0; font-size: 2rem; letter-spacing: .15em; }
+header p { margin: 4px 0 0; color: var(--muted); font-size: .95rem; }
 
-        h1, h2 {
-            color: #333;
-        }
+.card {
+    background: var(--card);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 22px 20px;
+    margin-bottom: 16px;
+}
+.screen[hidden] { display: none; }
+.screen { animation: pop .25s ease; }
+@keyframes pop { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
-        button {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 15px 32px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-        }
+.field { margin-bottom: 20px; }
+.field > label, .field > .label { display: block; font-weight: 700; margin-bottom: 8px; }
+.field small { color: var(--muted); font-weight: 400; margin-left: 6px; }
 
-        input[type="number"], select {
-            width: 200px;
-            padding: 5px;
-            margin: 10px;
-        }
+.stepper { display: flex; align-items: center; gap: 12px; }
+.stepper button {
+    width: 48px; height: 48px; border-radius: 14px; border: 2px solid var(--line);
+    background: var(--chip); color: var(--ink); font-size: 1.5rem; cursor: pointer;
+}
+.stepper button:active { transform: scale(.94); }
+.stepper output { flex: 1; text-align: center; font-size: 1.8rem; font-weight: 800; }
+.stepper output span { font-size: .9rem; color: var(--muted); font-weight: 400; margin-left: 4px; }
 
-        #role-content {
-            font-size: 18px;
-            margin: 20px 0;
-            padding: 10px;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-        }
+select {
+    width: 100%; padding: 13px 12px; font-size: 1rem; border-radius: 14px;
+    border: 2px solid var(--line); background: var(--card); color: var(--ink);
+}
 
-        #timer {
-            font-weight: bold;
-            color: #ff0000;
-        }
+.btn {
+    display: block; width: 100%; padding: 15px 20px; border: 0; border-radius: 16px;
+    background: var(--brand); color: var(--brand-ink); font-size: 1.1rem; font-weight: 700;
+    cursor: pointer; font-family: inherit; box-shadow: 0 6px 16px rgba(124, 77, 255, .35);
+}
+.btn:active { transform: scale(.98); }
+.btn.ghost { background: transparent; color: var(--ink); border: 2px solid var(--line); box-shadow: none; }
+.btn.danger { background: var(--bluff); color: #fff; box-shadow: 0 6px 16px rgba(232, 70, 107, .3); }
+.btn + .btn { margin-top: 12px; }
 
-        #question {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 20px 0;
-        }
+.rules { color: var(--muted); font-size: .9rem; margin: 0 0 20px; padding-left: 1.2em; }
+.rules li { margin-bottom: 2px; }
 
-        .hint {
-            font-style: italic;
-            color: #666;
-        }
-    </style>
+/* 傳遞手機 */
+.pass { text-align: center; }
+.avatar {
+    width: 112px; height: 112px; margin: 6px auto 14px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand), #ff7ab6);
+    color: #fff; font-size: 3.4rem; font-weight: 800; display: grid; place-items: center;
+    box-shadow: 0 10px 24px rgba(124, 77, 255, .4);
+}
+.pass h2 { margin: 0 0 4px; }
+.pass p { color: var(--muted); margin: 0 0 20px; }
+.progress { display: flex; justify-content: center; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+.progress i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.progress i.done { background: var(--brand); }
+.progress i.now { background: var(--brand); box-shadow: 0 0 0 4px rgba(124, 77, 255, .25); }
+
+/* 題目與提示 */
+.q-label { color: var(--muted); font-size: .85rem; letter-spacing: .1em; }
+.q-title { font-size: 1.9rem; font-weight: 800; margin: 2px 0 10px; word-break: break-word; }
+.hints { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; align-items: center; }
+.hints .tag { font-size: .8rem; color: var(--muted); }
+.chip { background: var(--chip); padding: 4px 12px; border-radius: 999px; font-size: .9rem; }
+.hint-note { width: 100%; color: var(--muted); font-size: .8rem; margin: 0; }
+
+/* 角色揭曉 */
+.role { border-radius: 18px; padding: 20px 16px; text-align: center; margin: 16px 0; border: 2px solid transparent; }
+.role.honest { background: color-mix(in srgb, var(--honest) 14%, transparent); border-color: var(--honest); }
+.role.bluff { background: color-mix(in srgb, var(--bluff) 14%, transparent); border-color: var(--bluff); }
+.role .name { font-size: 1.5rem; font-weight: 800; }
+.role.honest .name { color: var(--honest); }
+.role.bluff .name { color: var(--bluff); }
+.role .body { margin-top: 10px; text-align: left; font-size: 1.05rem; }
+.role .body.center { text-align: center; }
+
+.timer { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.timer .bar { flex: 1; height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.timer .bar span { display: block; height: 100%; background: var(--brand); width: 100%; transition: width 1s linear; }
+.timer b { min-width: 3.2em; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* 發言順序 */
+.order { list-style: none; padding: 0; margin: 14px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.order li { display: flex; align-items: center; gap: 6px; background: var(--chip); border-radius: 999px; padding: 4px 12px 4px 4px; }
+.order li b {
+    width: 28px; height: 28px; border-radius: 50%; background: var(--brand); color: var(--brand-ink);
+    display: grid; place-items: center; font-size: .9rem;
+}
+.order li:first-child { outline: 2px solid var(--brand); }
+.speak-tip { color: var(--muted); font-size: .9rem; margin: 10px 0 0; }
+
+/* 結果 */
+.result-hero { text-align: center; }
+.result-hero .big { font-size: 1.1rem; color: var(--muted); }
+.result-hero .who {
+    font-size: 2.4rem; font-weight: 800; color: var(--honest); margin: 4px 0 12px;
+}
+.truth { background: var(--chip); border-radius: 14px; padding: 14px 16px; margin: 14px 0; }
+.truth .t { font-size: .8rem; color: var(--muted); letter-spacing: .1em; }
+.roles { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; }
+.roles span { padding: 4px 12px; border-radius: 999px; font-size: .9rem; border: 2px solid var(--line); }
+.roles span.h { border-color: var(--honest); color: var(--honest); font-weight: 700; }
+
+dialog {
+    border: 0; border-radius: 20px; padding: 24px 20px; width: min(90vw, 360px);
+    background: var(--card); color: var(--ink); box-shadow: var(--shadow); text-align: center;
+}
+dialog::backdrop { background: rgba(10, 5, 25, .6); }
+dialog h3 { margin: 0 0 6px; }
+dialog p { color: var(--muted); margin: 0 0 18px; }
+</style>
 </head>
 <body>
-    <div id="game-setup">
-        <label for="player-count">選擇玩家數量：</label>
-        <input type="number" id="player-count" min="2" value="2"><br>
-        <label for="countdown-time">選擇倒數秒數：</label>
-        <input type="number" id="countdown-time" min="5" value="10"><br>
-        <label for="question-select">選擇題目：</label>
-        <select id="question-select"></select><br>
-        <button id="start-game">開始遊戲</button>
-    </div>
+<div class="app">
+    <header>
+        <h1>唬爛王</h1>
+        <p>一個人知道真相，其他人拚命唬爛</p>
+    </header>
 
-    <div id="game-area" style="display:none;">
-        <h2 id="question"></h2>
-        <p id="hint-1" class="hint"></p>
-        <p id="hint-2" class="hint"></p>
-        <button id="draw-button">抽</button>
-        <div id="role-content"></div>
-        <div id="timer"></div>
-        <div id="player-id"></div>
-    </div>
+    <!-- 設定 -->
+    <section id="screen-setup" class="screen card">
+        <ol class="rules">
+            <li>每人輪流偷看自己的角色，看完會自動隱藏</li>
+            <li>只有「老實人」會拿到題目的真正解釋，其他人是「唬爛王」</li>
+            <li>大家輪流講解，最後猜出誰是老實人</li>
+        </ol>
+        <div class="field">
+            <span class="label">玩家人數</span>
+            <div class="stepper">
+                <button type="button" data-step="players" data-dir="-1" aria-label="減少玩家">−</button>
+                <output id="out-players" aria-live="polite">4<span>人</span></output>
+                <button type="button" data-step="players" data-dir="1" aria-label="增加玩家">+</button>
+            </div>
+        </div>
+        <div class="field">
+            <span class="label">角色顯示秒數<small>看完可提早關閉</small></span>
+            <div class="stepper">
+                <button type="button" data-step="seconds" data-dir="-1" aria-label="減少秒數">−</button>
+                <output id="out-seconds" aria-live="polite">10<span>秒</span></output>
+                <button type="button" data-step="seconds" data-dir="1" aria-label="增加秒數">+</button>
+            </div>
+        </div>
+        <div class="field">
+            <label for="question-select">題目</label>
+            <select id="question-select"></select>
+        </div>
+        <button id="btn-start" class="btn">開始遊戲</button>
+    </section>
 
+    <!-- 傳手機 -->
+    <section id="screen-pass" class="screen card pass" hidden>
+        <div class="progress" id="progress"></div>
+        <div class="avatar" id="pass-avatar">A</div>
+        <h2 id="pass-title">玩家 A</h2>
+        <p>請把手機交給這位玩家，其他人不要偷看</p>
+        <button id="btn-draw" class="btn">我是玩家 A，查看角色</button>
+    </section>
 
-    <div id="question-speak" style="display:none;">
-        <h2>輪流講解題目</h2>
-		<div id="final-question"></div>
-		<div id="final-hints"></div>
-		<label for="check-role">確認角色：</label>
-		<select id="check-role"></select>
-		<button id="confirm-role">確認</button>
-		<div id="role-result"></div>
-		<button id="reveal-result">公布結果</button><br><br><br>
-		<div id="result-content" style="display:none;"></div>
-		<button id="restart-game">重新開始</button>
-    </div>
+    <!-- 看角色 -->
+    <section id="screen-reveal" class="screen card" hidden>
+        <div class="timer"><div class="bar"><span id="timer-bar"></span></div><b id="timer-text">10 秒</b></div>
+        <div class="q-label">題目</div>
+        <div class="q-title" id="reveal-question"></div>
+        <div class="hints" id="reveal-hints"></div>
+        <div class="role" id="role-box">
+            <div class="name" id="role-name"></div>
+            <div class="body" id="role-body"></div>
+        </div>
+        <button id="btn-hide" class="btn ghost">我記好了，隱藏</button>
+    </section>
 
+    <!-- 發言 -->
+    <section id="screen-speak" class="screen card" hidden>
+        <div class="q-label">本回合題目</div>
+        <div class="q-title" id="speak-question"></div>
+        <div class="hints" id="speak-hints"></div>
+        <p class="speak-tip">依序輪流講解這個詞，老實人要說得像在唬爛，唬爛王要說得像真的。</p>
+        <ul class="order" id="speak-order"></ul>
+        <div style="height:20px"></div>
+        <button id="btn-reveal" class="btn danger">公布結果</button>
+    </section>
 
-    <script>
-        const questions = [
+    <!-- 結果 -->
+    <section id="screen-result" class="screen card result-hero" hidden>
+        <div class="big">老實人是</div>
+        <div class="who" id="result-who">玩家 A</div>
+        <div class="q-label">題目</div>
+        <div class="q-title" id="result-question"></div>
+        <div class="truth">
+            <div class="t">真正的解釋</div>
+            <div id="result-content"></div>
+        </div>
+        <div class="roles" id="result-roles"></div>
+        <div style="height:20px"></div>
+        <button id="btn-again" class="btn">再玩一次（換題目）</button>
+        <button id="btn-setup" class="btn ghost">回到設定</button>
+    </section>
+</div>
+
+<dialog id="confirm-dialog">
+    <h3>確定要公布結果嗎？</h3>
+    <p>公布後就不能再猜了。</p>
+    <button id="btn-confirm-yes" class="btn danger">公布</button>
+    <button id="btn-confirm-no" class="btn ghost">再想想</button>
+</dialog>
+
+<script>
+const questions = [
     {
         "question": "7±2",
         "hint_1": "None",
@@ -448,135 +606,267 @@
         "content": "紫之隧道（Zizhi Tunnel），是中國浙江省杭州市西湖區境內的 城市地下通道，位於西湖風景區之下，也是杭州市\"四縱五橫\"快速路網重要組成部分"
     },
 
-]
+];
 
-        let playerCount;
-        let currentPlayer = 0;
-        let currentQuestion;
-        let thinkerIndex;
-        let countdownTime;
-        let playerRoles = [];
+(function () {
+    'use strict';
 
-        function initializeGame() {
-            const questionSelect = document.getElementById('question-select');
-            questionSelect.innerHTML = '<option value="random">隨機題目</option>';
-            questions.forEach((q, index) => {
-                questionSelect.innerHTML += `<option value="${index}">${q.question}</option>`;
+    const $ = (id) => document.getElementById(id);
+    const screens = ['setup', 'pass', 'reveal', 'speak', 'result'];
+
+    const limits = { players: [2, 20], seconds: [3, 60] };
+    const settings = loadSettings();
+    const game = { thinker: 0, question: null, current: 0, timerId: null, deck: [] };
+
+    function loadSettings() {
+        const base = { players: 4, seconds: 10 };
+        try {
+            const saved = JSON.parse(localStorage.getItem('huLanKing') || '{}');
+            for (const k of Object.keys(base)) {
+                const n = Number(saved[k]);
+                if (Number.isFinite(n)) base[k] = Math.min(limits[k][1], Math.max(limits[k][0], Math.round(n)));
+            }
+        } catch (e) { /* 無痕模式等情況略過 */ }
+        return base;
+    }
+    function saveSettings() {
+        try { localStorage.setItem('huLanKing', JSON.stringify(settings)); } catch (e) { /* ignore */ }
+    }
+
+    function show(name) {
+        screens.forEach((s) => { $('screen-' + s).hidden = s !== name; });
+        window.scrollTo(0, 0);
+    }
+
+    const letter = (i) => String.fromCharCode(65 + i);
+
+    // 題庫文字原本因換行混入了中文字之間的空白，顯示時清掉
+    const CJK = '[\\u3000-\\u303f\\u4e00-\\u9fff\\uff00-\\uffef“”‘’]';
+    const tidy = (s) => String(s).replace(new RegExp('(?<=' + CJK + ')\\s+(?=' + CJK + ')', 'g'), '');
+
+    function parseHints(q) {
+        const chips = [];
+        let note = '';
+        [q.hint_1, q.hint_2].forEach((raw) => {
+            let h = String(raw || '').trim().replace(/^[（(]|[）)]$/g, '').replace(/^提示[:：]\s*/, '');
+            if (!h || h.toLowerCase() === 'none') return;
+            if (h === '提示僅有一個正確') { note = '提示中只有一個是正確的'; return; }
+            h.split(/[;；,，、]/).map((x) => x.trim()).filter(Boolean).forEach((x) => chips.push(x));
+        });
+        return { chips, note };
+    }
+
+    function renderHints(el, q) {
+        const { chips, note } = parseHints(q);
+        el.textContent = '';
+        if (!chips.length && !note) {
+            const t = document.createElement('span');
+            t.className = 'tag';
+            t.textContent = '這題沒有提示';
+            el.appendChild(t);
+            return;
+        }
+        if (chips.length) {
+            const t = document.createElement('span');
+            t.className = 'tag';
+            t.textContent = '提示';
+            el.appendChild(t);
+            chips.forEach((c) => {
+                const s = document.createElement('span');
+                s.className = 'chip';
+                s.textContent = c;
+                el.appendChild(s);
             });
         }
-
-        function startGame() {
-            playerCount = parseInt(document.getElementById('player-count').value);
-            countdownTime = parseInt(document.getElementById('countdown-time').value);
-            if (playerCount < 2) {
-                alert('玩家數量必須至少為2');
-                return;
-            }
-
-            document.getElementById('game-setup').style.display = 'none';
-            document.getElementById('game-area').style.display = 'block';
-
-            thinkerIndex = Math.floor(Math.random() * playerCount);
-            const questionIndex = document.getElementById('question-select').value;
-            currentQuestion = questionIndex === 'random' ? questions[Math.floor(Math.random() * questions.length)] : questions[questionIndex];
-
-            playerRoles = Array(playerCount).fill('唬爛王');
-            playerRoles[thinkerIndex] = '老實人';
-
-            displayQuestion();
-			showDrawButton();  // 確保遊戲開始時抽按鈕是可見的
+        if (note) {
+            const p = document.createElement('p');
+            p.className = 'hint-note';
+            p.textContent = '※ ' + note;
+            el.appendChild(p);
         }
+    }
 
-        function displayQuestion() {
-            document.getElementById('question').textContent = `題目：${currentQuestion.question}`;
-        }
-		function showDrawButton() {
-			const drawButton = document.getElementById('draw-button');
-			drawButton.style.display = 'inline-block';  // 顯示抽按鈕
-		}
-		function revealResult() {
-			if (confirm("確定要公布結果嗎？")) {
-				const resultContent = document.getElementById('result-content');
-				const thinkerLetter = String.fromCharCode(65 + thinkerIndex);
-				resultContent.innerHTML = `
-					<h3>結果公布</h3>
-					<p>老實人是：玩家 ${thinkerLetter}</p>
-					<p>題目內容：${currentQuestion.content}</p>
-				`;
-				resultContent.style.display = 'block';
-			}
-		}
-        function drawRole() {
-			const drawButton = document.getElementById('draw-button');
-            const roleContent = document.getElementById('role-content');
-            const playerId = document.getElementById('player-id');
-            const playerLetter = String.fromCharCode(65 + currentPlayer);
-            playerId.textContent = `玩家 ${playerLetter}`;
+    // ---- 設定畫面 ----
+    function renderSettings() {
+        $('out-players').firstChild.nodeValue = settings.players;
+        $('out-seconds').firstChild.nodeValue = settings.seconds;
+    }
 
-            if (currentPlayer === thinkerIndex) {
-                roleContent.textContent = `你是「老實人」：${currentQuestion.content}`;
-            } else {
-                roleContent.textContent = '你是「唬爛王」：請自己唬爛';
-            }
-
-            let timeLeft = countdownTime;
-            const timer = document.getElementById('timer');
-            timer.textContent = `${timeLeft}秒後隱藏`;
-
-            const countDown = setInterval(() => {
-                timeLeft--;
-                timer.textContent = `${timeLeft}秒後隱藏`;
-                if (timeLeft <= 0) {
-                    clearInterval(countDown);
-                    roleContent.textContent = '';
-                    timer.textContent = '';
-                    playerId.textContent = '';
-                    currentPlayer++;
-                    if (currentPlayer >= playerCount) {
-                        endGame();
-                    } else {
-						showDrawButton();  // 顯示抽按鈕，準備給下一個玩家使用
-					}
-                }
-            }, 1000);
-        }
-
-        function endGame() {
-            document.getElementById('game-area').style.display = 'none';
-            document.getElementById('question-speak').style.display = 'block';
-
-            document.getElementById('final-question').textContent = `題目：${currentQuestion.question}`;
-
-            const checkRoleSelect = document.getElementById('check-role');
-            checkRoleSelect.innerHTML = '';
-            for (let i = 0; i < playerCount; i++) {
-                const playerLetter = String.fromCharCode(65 + i);
-                checkRoleSelect.innerHTML += `<option value="${playerLetter}">玩家 ${playerLetter}</option>`;
-            }
-        }
-
-        function confirmRole() {
-            const playerLetter = document.getElementById('check-role').value;
-            const playerIndex = playerLetter.charCodeAt(0) - 65;
-            const roleResult = document.getElementById('role-result');
-            roleResult.textContent = `玩家 ${playerLetter} 的角色是：${playerRoles[playerIndex]}`;
-        }
-
-        function restartGame() {
-            document.getElementById('question-speak').style.display = 'none';
-            document.getElementById('game-setup').style.display = 'block';
-            currentPlayer = 0;
-            document.getElementById('role-result').textContent = '';
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeGame();
-            document.getElementById('start-game').addEventListener('click', startGame);
-            document.getElementById('draw-button').addEventListener('click', drawRole);
-            document.getElementById('confirm-role').addEventListener('click', confirmRole);
-            document.getElementById('restart-game').addEventListener('click', restartGame);
-			document.getElementById('reveal-result').addEventListener('click', revealResult);
+    function fillQuestions() {
+        const sel = $('question-select');
+        sel.textContent = '';
+        const r = document.createElement('option');
+        r.value = 'random';
+        r.textContent = '🎲 隨機題目（共 ' + questions.length + ' 題）';
+        sel.appendChild(r);
+        questions.forEach((q, i) => {
+            const o = document.createElement('option');
+            o.value = i;
+            o.textContent = q.question;
+            sel.appendChild(o);
         });
-    </script>
+    }
+
+    document.querySelectorAll('.stepper button').forEach((b) => {
+        b.addEventListener('click', () => {
+            const key = b.dataset.step;
+            const step = key === 'seconds' ? 1 : 1;
+            const [lo, hi] = limits[key];
+            settings[key] = Math.min(hi, Math.max(lo, settings[key] + step * Number(b.dataset.dir)));
+            renderSettings();
+            saveSettings();
+        });
+    });
+
+    // 隨機題目：洗牌後依序抽，抽完才重洗，避免連續重複
+    function nextRandomQuestion() {
+        if (!game.deck.length) {
+            game.deck = questions.map((_, i) => i);
+            for (let i = game.deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [game.deck[i], game.deck[j]] = [game.deck[j], game.deck[i]];
+            }
+        }
+        return questions[game.deck.pop()];
+    }
+
+    function startGame(forceRandom) {
+        const choice = forceRandom ? 'random' : $('question-select').value;
+        game.question = choice === 'random' ? nextRandomQuestion() : questions[Number(choice)];
+        game.thinker = Math.floor(Math.random() * settings.players);
+        game.current = 0;
+        showPass();
+    }
+
+    // ---- 傳手機 ----
+    function showPass() {
+        const l = letter(game.current);
+        $('pass-avatar').textContent = l;
+        $('pass-title').textContent = '輪到玩家 ' + l;
+        $('btn-draw').textContent = '我是玩家 ' + l + '，查看角色';
+
+        const prog = $('progress');
+        prog.textContent = '';
+        for (let i = 0; i < settings.players; i++) {
+            const d = document.createElement('i');
+            if (i < game.current) d.className = 'done';
+            else if (i === game.current) d.className = 'now';
+            prog.appendChild(d);
+        }
+        show('pass');
+    }
+
+    // ---- 看角色 ----
+    function showRole() {
+        const q = game.question;
+        const honest = game.current === game.thinker;
+        $('reveal-question').textContent = q.question;
+        renderHints($('reveal-hints'), q);
+
+        const box = $('role-box');
+        box.className = 'role ' + (honest ? 'honest' : 'bluff');
+        $('role-name').textContent = honest ? '你是「老實人」' : '你是「唬爛王」';
+        const body = $('role-body');
+        body.className = 'body' + (honest ? '' : ' center');
+        body.textContent = honest ? tidy(q.content) : '你不知道真正的意思，看提示自己編一個說法吧！';
+
+        let left = settings.seconds;
+        const bar = $('timer-bar');
+        const text = $('timer-text');
+        bar.style.transition = 'none';
+        bar.style.width = '100%';
+        text.textContent = left + ' 秒';
+        show('reveal');
+        // 下一個影格再啟動進度條動畫
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            bar.style.transition = 'width 1s linear';
+            bar.style.width = ((left - 1) / settings.seconds * 100) + '%';
+        }));
+
+        clearInterval(game.timerId);
+        game.timerId = setInterval(() => {
+            left--;
+            if (left <= 0) { hideRole(); return; }
+            text.textContent = left + ' 秒';
+            bar.style.width = ((left - 1) / settings.seconds * 100) + '%';
+        }, 1000);
+    }
+
+    function hideRole() {
+        clearInterval(game.timerId);
+        game.timerId = null;
+        // 先清掉內容，避免切換時殘留
+        $('role-body').textContent = '';
+        $('role-name').textContent = '';
+        game.current++;
+        if (navigator.vibrate) { try { navigator.vibrate(60); } catch (e) { /* ignore */ } }
+        if (game.current >= settings.players) showSpeak();
+        else showPass();
+    }
+
+    // ---- 發言 ----
+    function showSpeak() {
+        const q = game.question;
+        $('speak-question').textContent = q.question;
+        renderHints($('speak-hints'), q);
+
+        // 隨機決定從誰開始，順序循環
+        const start = Math.floor(Math.random() * settings.players);
+        const ol = $('speak-order');
+        ol.textContent = '';
+        for (let i = 0; i < settings.players; i++) {
+            const idx = (start + i) % settings.players;
+            const li = document.createElement('li');
+            const b = document.createElement('b');
+            b.textContent = letter(idx);
+            li.appendChild(b);
+            li.appendChild(document.createTextNode('玩家 ' + letter(idx)));
+            ol.appendChild(li);
+        }
+        show('speak');
+    }
+
+    // ---- 結果 ----
+    function showResult() {
+        const q = game.question;
+        $('result-who').textContent = '玩家 ' + letter(game.thinker);
+        $('result-question').textContent = q.question;
+        $('result-content').textContent = tidy(q.content);
+        const wrap = $('result-roles');
+        wrap.textContent = '';
+        for (let i = 0; i < settings.players; i++) {
+            const s = document.createElement('span');
+            const honest = i === game.thinker;
+            s.textContent = letter(i) + ' ' + (honest ? '老實人' : '唬爛王');
+            if (honest) s.className = 'h';
+            wrap.appendChild(s);
+        }
+        show('result');
+    }
+
+    // ---- 事件 ----
+    const dlg = $('confirm-dialog');
+    $('btn-start').addEventListener('click', () => startGame(false));
+    $('btn-draw').addEventListener('click', showRole);
+    $('btn-hide').addEventListener('click', hideRole);
+    $('btn-reveal').addEventListener('click', () => {
+        if (typeof dlg.showModal === 'function') dlg.showModal();
+        else if (confirm('確定要公布結果嗎？')) showResult();
+    });
+    $('btn-confirm-yes').addEventListener('click', () => { dlg.close(); showResult(); });
+    $('btn-confirm-no').addEventListener('click', () => dlg.close());
+    $('btn-again').addEventListener('click', () => startGame(true));
+    $('btn-setup').addEventListener('click', () => show('setup'));
+
+    // 切到背景時就隱藏角色，避免被別人看到
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && game.timerId) hideRole();
+    });
+
+    fillQuestions();
+    renderSettings();
+    show('setup');
+})();
+</script>
 </body>
 </html>
